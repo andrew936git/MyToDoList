@@ -19,9 +19,9 @@ class MainActivity : AppCompatActivity(), OnFragmentDataListener {
         }
     }
 
-    override fun onData(position: Int, note: Note) {
+    override fun onData(notes: ArrayList<Note>, position: Int) {
         val bundle = Bundle()
-        bundle.putSerializable("note", note)
+        bundle.putParcelableArrayList("notes", notes)
         bundle.putInt("position", position)
 
         val transaction = this.supportFragmentManager.beginTransaction()

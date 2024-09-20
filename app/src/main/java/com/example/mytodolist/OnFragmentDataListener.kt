@@ -1,5 +1,5 @@
 package com.example.mytodolist
 
 interface OnFragmentDataListener {
-    fun onData(position: Int, note: Note)
+    fun onData(notes: ArrayList<Note>, position: Int)
 }

@@ -7,7 +7,7 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class CustomAdapter(private val list: MutableList<Note>):
+class CustomAdapter(private val list: ArrayList<Note>):
     RecyclerView.Adapter<CustomAdapter.NoteViewHolder>() {
 
     private var onNoteClickListener: OnNoteClickListener? = null
@@ -24,14 +24,12 @@ class CustomAdapter(private val list: MutableList<Note>):
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-        val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.list_item, parent, false)
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
         return NoteViewHolder(itemView)
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount(): Int = list.size
+
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val note = list[position]
@@ -39,12 +37,13 @@ class CustomAdapter(private val list: MutableList<Note>):
         holder.dateNoteTV.text = note.date
         holder.textNoteTV.text = note.noteText
         holder.checkBox.isChecked = note.isDone
-        if (onNoteClickListener != null){
-            onNoteClickListener!!.onNoteClick(note, position)
+        holder.itemView.setOnClickListener {
+            if (onNoteClickListener != null) {
+                onNoteClickListener?.onNoteClick(note, position)
+            }
         }
 
     }
-
     fun setOnNoteClickListener(onNoteClickListener: OnNoteClickListener){
         this.onNoteClickListener = onNoteClickListener
     }

@@ -18,7 +18,10 @@ import java.time.format.DateTimeFormatter
 class FirstFragment : Fragment() {
     private lateinit var onFragmentDataListener: OnFragmentDataListener
     private var adapter: CustomAdapter? = null
-    private var noteList = mutableListOf<Note>()
+    private var noteList = arrayListOf<Note>()
+    private var note: Note? = null
+    private lateinit var noteET: EditText
+    private lateinit var recyclerView: RecyclerView
 
     @SuppressLint("NewApi", "NotifyDataSetChanged")
     override fun onCreateView(
@@ -29,16 +32,29 @@ class FirstFragment : Fragment() {
         onFragmentDataListener = requireActivity() as OnFragmentDataListener
         val view = inflater.inflate(R.layout.fragment_first, container, false)
 
-        val noteET = view.findViewById<EditText>(R.id.noteET)
-        val saveBT = view.findViewById<Button>(R.id.saveBT)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar).apply{
-            setTitle("Мои заметки")
-            setNavigationIcon(R.drawable.ic_exit)
-            setNavigationOnClickListener {
-                requireActivity().finish()
+
+            noteET = view.findViewById(R.id.noteET)
+            val saveBT = view.findViewById<Button>(R.id.saveBT)
+            recyclerView = view.findViewById(R.id.recyclerView)
+            view.findViewById<Toolbar>(R.id.toolbar).apply {
+                setTitle("Мои заметки")
+                setNavigationIcon(R.drawable.ic_exit)
+                setNavigationOnClickListener {
+                    requireActivity().finish()
+                }
             }
+
+        val newList = arguments?.getParcelableArrayList<Note>("newList")
+        if (newList != null) {
+            noteList = newList
         }
+        val newPosition = arguments?.getInt("positionNew")
+        if (newPosition != null) {
+            createAdapter()
+        }
+
+
+
         val dateNow = LocalDate.now()
         val formatDate = DateTimeFormatter.ofPattern("dd MMM yyyy")
         val formatDayNow = dateNow.format(formatDate)
@@ -46,25 +62,26 @@ class FirstFragment : Fragment() {
         saveBT.setOnClickListener {
             val number = noteList.size + 1
             val text = noteET.text.toString()
-
-            noteList.add(Note(number, formatDayNow, text, false))
-            adapter = context?.let { CustomAdapter(noteList) }
-            recyclerView.layoutManager = LinearLayoutManager(context)
-            recyclerView.adapter = adapter
-            recyclerView.setHasFixedSize(true)
-            adapter!!.notifyDataSetChanged()
+            note = Note(number, formatDayNow, text, false)
+            noteList.add(note!!)
             noteET.text.clear()
+            createAdapter()
         }
-        adapter?.setOnNoteClickListener(object :
-        CustomAdapter.OnNoteClickListener{
 
-                override fun onNoteClick(note: Note, position: Int) {
-
-                    onFragmentDataListener.onData(position, noteList[position])
-                }
-            }
-        )
         return view
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    private fun createAdapter() {
+        adapter = CustomAdapter(noteList)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.setHasFixedSize(true)
+        adapter?.notifyDataSetChanged()
+        adapter?.setOnNoteClickListener(object : CustomAdapter.OnNoteClickListener {
+            override fun onNoteClick(note: Note, position: Int) {
+                onFragmentDataListener.onData(noteList, position)
+            }
+        })
+    }
 }
